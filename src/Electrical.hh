@@ -9,11 +9,10 @@ const int PERCENTAGE_0 = -100;
 const int PERCENTAGE_100 = 100;
 
 // 63 is full reverse, 153 is neutral, 243 is max forwards
-const int MIN_PWM_OUT = 63;
-const int MAX_PWM_OUT = 243;
+const int MIN_PWM_OUT = 55;
+const int MAX_PWM_OUT = 100;
 
-const int VICTOR_PWM_IN_FREQUENCY = 400;
-//const int VICTOR_PWM_IN_FREQUENCY = 5000;
+const int VICTOR_PWM_IN_FREQUENCY = 200;
 const int DEFAULT_BIT_RESOLUTION = 8;
 
 int leftDriveTrain[] = {-1, -1, -1};
@@ -29,7 +28,7 @@ const int MOTORS_PER_SIDE = 3;
  * 
  * @param freq PWM frequency in Hz
  */
-void setup(int pin, int channel, int freq=VICTOR_PWM_IN_FREQUENCY, int bits=DEFAULT_BIT_RESOLUTION) {
+void setupElec(int pin, int channel, int freq=VICTOR_PWM_IN_FREQUENCY, int bits=DEFAULT_BIT_RESOLUTION) {
 	ledcAttachPin(pin, channel);
 	ledcSetup(channel, freq, bits);
 }
@@ -81,10 +80,14 @@ void moveMotors(int left, int right){
 		ledcWrite(rightDriveTrain[i], right);
 
 #ifdef DEBUG
-    Serial.println("Left Channel " + leftDriveTrain[i]);
-    Serial.println("Value: " + left);
-    Serial.println("Right Channel " + rightDriveTrain[i]);
-    Serial.println("Value: " + right);
+    Serial.print("Left Channel ");
+    Serial.print(leftDriveTrain[i]);
+    Serial.print(" Value: ");
+    Serial.print(left);
+    Serial.print(", Right Channel ");
+    Serial.print(rightDriveTrain[i]);
+    Serial.print(" Value: ");
+    Serial.println(right);
 #endif
 	}
 

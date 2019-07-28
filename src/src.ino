@@ -1,5 +1,7 @@
 #include <WiFi.h>
 #include "ESPAsyncWebServer.h"
+#include <SPIFFS.h>;
+
 #include "CommunicationStuff.hh"
 #include "Electrical.hh"
 #include "PreprocessorOptions.hh"
@@ -27,7 +29,8 @@ void IRAM_ATTR onTimer() {
   portENTER_CRITICAL_ISR(&timerMux);
   
 #ifdef DEBUG
-  Serial.println("On timer");
+  Serial.println(F("On timer"));
+  Serial.println(lastPingVal - numPings);
 #endif
   
   if (lastPingVal == numPings) {
@@ -46,13 +49,14 @@ void setup()
 
   // setup electrical stuff
   for (int i = 0; i < NUM_MOTORS_PER_SIDE; i++) {
-    setup(LEFT_DRIVE_PINS[i], LEFT_DRIVE_CHANNELS[i]);
-    setup(RIGHT_DRIVE_PINS[i], RIGHT_DRIVE_CHANNELS[i]);
+    setupElec(LEFT_DRIVE_PINS[i], LEFT_DRIVE_CHANNELS[i]);
+    setupElec(RIGHT_DRIVE_PINS[i], RIGHT_DRIVE_CHANNELS[i]);
 
     setDriveChannel(i, LEFT_DRIVE_CHANNELS[i]);
     setDriveChannel(i+3, RIGHT_DRIVE_CHANNELS[i]);
   }
 
+  
   // run WiFi server and control motor PWM outputs (CORE 0 - secondary core)
   
    /**xTaskCreatePinnedToCore(
