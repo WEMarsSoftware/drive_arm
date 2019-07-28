@@ -3,8 +3,10 @@
 #ifndef SENSOR_CONTROLLER
 #define SENSOR_CONTROLLER
 
+//#define ARMCONTROLLER 1
+
 #include "Arduino.h"
-#include "RotaryEncoder.h"
+#include "ESP32Encoder.h"
 #include "SPI.h"
 
 // Note: different than Arduino
@@ -33,7 +35,7 @@ public:
 
 	// RotaryEncoder library will count number of ticks in specified time length
 	// specified in constructor (last parameter in microseconds)
-	static RotaryEncoder* encoders[NUM_CHASSIS_MOTORS];
+	static ESP32Encoder encoders[NUM_CHASSIS_MOTORS];
 	static int deltaTicks[NUM_CHASSIS_MOTORS];
   static int potVals[NUM_CHASSIS_MOTORS];
   
@@ -67,15 +69,17 @@ public:
 
 	// attach encoders to pins
 	static void setupSensors(void* args);
-  static void vspiCommand();
-  static void hspiCommand();
+#ifdef ARMCONTROLLER 	
+  static void potSPICmd();
+#endif
+  static void CurrentSPICmd();
 };
 
 // link statics
 int SensorController::currentValues[NUM_CHASSIS_MOTORS] = {};
 int SensorController::speedValues[NUM_CHASSIS_MOTORS] = {};
 int SensorController::potVals[NUM_CHASSIS_MOTORS] = {};
-RotaryEncoder* SensorController::encoders[NUM_CHASSIS_MOTORS];
+ESP32Encoder SensorController::encoders[NUM_CHASSIS_MOTORS];
 
 // pin assignments temporary
 int SensorController::A_PINS[NUM_CHASSIS_MOTORS] = {36, 34, 32, 25, 26, 19};
@@ -112,18 +116,21 @@ void SensorController::sensorsCoreLoop()
 {
 	while (true)
 	{
-  /*
+#ifdef ARMCONTROLLER   
+    potSPICmd();
+#else
 		// update encoder and current sensor data
 		for (int i = 0; i < NUM_CHASSIS_MOTORS; i++)
 		{
-			deltaTicks[i] = encoders[i]->readEncoder();
+			//deltaTicks[i] = encoders[i]->readEncoder();
 			speedValues[i] = (double)(deltaTicks[i])/ENCODER_TIME;
 
 			currentValues[i] = analogRead(CURRENT_IN[i]);
 		}
-   */
-    vspiCommand();
-    hspiCommand();
+   
+#endif
+    CurrentSPICmd();
+
 		delay(CORE_LOOP_DELAY);
   } 
 }
@@ -131,25 +138,34 @@ void SensorController::sensorsCoreLoop()
 void SensorController::setupSensors(void* args)
 {
 	// create RotaryEncoder objects
-	/*for (int i = 0; i < NUM_CHASSIS_MOTORS; i++)
+    
+	for (int i = 0; i < NUM_CHASSIS_MOTORS; i++)
 	{
-		//encoders[i] = new RotaryEncoder(A_PINS[i], B_PINS[i], 1, 1, ENCODER_TIME);
-	}*/
+		
+     encoders[i].attachHalfQuad(A_PINS[i], B_PINS[i]);
+      
+	}
 
    // initialise two instances of the SPIClass attached to VSPI and HSPI respectively
-  vspi = new SPIClass(VSPI);
+  #ifdef ARMCONTROLLER   
+    vspi = new SPIClass(VSPI);
+  #endif
   hspi = new SPIClass(HSPI);
   
   // clock miso mosi ss
 
   // initialise
+ #ifdef ARMCONTROLLER 
   vspi->begin(VSPI_CLK, VSPI_MISO, VSPI_MOSI, VSPI_CS_POT);
   vspi->setHwCs(false);
+#endif
   hspi->begin(HSPI_CLK, HSPI_MISO, HSPI_MOSI, HSPI_CS_CURR);
   hspi->setHwCs(false);
 
   //set up slave select pins as outputs
+ #ifdef ARMCONTROLLER 
   pinMode(VSPI_CS_POT, OUTPUT);
+ #endif
   pinMode(HSPI_CS_CURR, OUTPUT);
   pinMode(HSPI_CS_IO, OUTPUT);
   
@@ -157,9 +173,9 @@ void SensorController::setupSensors(void* args)
 	sensorsCoreLoop();
 }
 
-
+#ifdef ARMCONTROLLER 
 // Update data from pots
-void SensorController::vspiCommand() {
+void SensorController::potSPICmd() {
   byte address = 0; // junk data to illustrate usage
 
   // query MAX11628EEE ADC for 8 channels of data
@@ -179,9 +195,10 @@ void SensorController::vspiCommand() {
     
   }
 }
+#endif
 
 // Update data from current sensors
-void SensorController::hspiCommand() {
+void SensorController::CurrentSPICmd() {
   byte address = 0;
   for (; address < NUM_CHASSIS_MOTORS; address++) {  
     hspi->beginTransaction(SPISettings(spiClk, MSBFIRST, SPI_MODE0));
