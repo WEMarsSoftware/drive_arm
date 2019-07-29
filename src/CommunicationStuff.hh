@@ -6,7 +6,9 @@
 #include "Arduino.h"
 #include <WiFi.h>
 #include "ESPAsyncWebServer.h"
-#include <SPIFFS.h>;
+#include <SPIFFS.h>
+
+
 
 #include "Electrical.hh"
 #include "SensorController.hh"
@@ -17,8 +19,10 @@ const char* password = "westill1";
 
 // COMMUNICATION CONSTANTS
 AsyncWebServer server(80);
-AsyncWebSocket ws("/ws");
-AsyncWebSocketClient * globalClient = NULL; //client for server
+//AsyncWebSocket ws("/ws");
+//AsyncWebSocketClient * globalClient = NULL; //client for server
+
+#include "GamepadWebsocket.h"
 
 IPAddress staticIP(192,168,1,100);
 IPAddress gateway(192,168,1,1);
@@ -42,23 +46,6 @@ int wifi_status; //status of wifi
 bool server_connect = false; //if server is connected
 
 
-//if there is a websocket event
-void onWsEvent(AsyncWebSocket * server, AsyncWebSocketClient * client, AwsEventType type, void * arg, uint8_t *data, size_t len){
-
-  //if the websocket has connected
-  if(type == WS_EVT_CONNECT){
- 
-    Serial.println("Websocket client connection received");
-    globalClient = client; //declare client
-    server_connect = true; 
-
-  //if the websocket has disconnected
-  } else if(type == WS_EVT_DISCONNECT){
-    Serial.println("Client disconnected");
-    globalClient = NULL; //to avoid errors
-    server_connect = false;
-  }
-}
 
 void inline connectToWiFi()
 {
@@ -68,15 +55,7 @@ void inline connectToWiFi()
     delay(100);
 
     
-  //need this to write to client
-  if(!SPIFFS.begin(true))
-  {
-     Serial.println(F("An Error has occurred while mounting SPIFFS"));
-     return;
-  }
-
-
-    WiFi.config(staticIP, gateway, subnet);
+   WiFi.config(staticIP, gateway, subnet);
     
     delay(100);
   
@@ -169,13 +148,8 @@ void inline setupESPServer(void * args)
        request->send(200, "text/plain", "Hello!");
    });
    
-  //start server
-  ws.onEvent(onWsEvent);
-  server.addHandler(&ws);
-  server.on("/html", HTTP_GET, [](AsyncWebServerRequest *request){
-    request->send(SPIFFS, "/ws.html", "text/html");
-  });
-  server.begin();
+   startServer();
+  //server.begin();
 }
 
 #endif

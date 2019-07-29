@@ -3,6 +3,7 @@
 #include <SPIFFS.h>;
 
 #include "CommunicationStuff.hh"
+#include "GamepadWebsocket.h"
 #include "Electrical.hh"
 #include "PreprocessorOptions.hh"
 #include "esp32-hal-ledc.h"
@@ -30,13 +31,13 @@ void IRAM_ATTR onTimer() {
   
 #ifdef DEBUG
   Serial.println(F("On timer"));
-  Serial.println(lastPingVal - numPings);
+  Serial.println(lastPingVal - GPWnumPings);
 #endif
   
-  if (lastPingVal == numPings) {
+  if (lastPingVal == GPWnumPings) {
     moveMotors(0, 0); // TURN MOTORS OFF -> WE LOST CONNECTION
   }
-  lastPingVal = numPings;
+  lastPingVal = GPWnumPings;
   
   portEXIT_CRITICAL_ISR(&timerMux);
 }

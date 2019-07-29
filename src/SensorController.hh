@@ -133,7 +133,7 @@ void SensorController::sensorsCoreLoop()
 			speedValues[i] = (double)(deltaTicks[i])/10;
 			currentValues[i] = analogRead(CURRENT_IN[i]);
 		}
-   digitalWrite(21,LOW);
+   //digitalWrite(21,LOW);
    
 #endif
     CurrentSPICmd();
