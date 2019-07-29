@@ -22,7 +22,9 @@ const int MAX_CURRENT_IN = 33;
 const int spiClk = 1000000; // 1 MHz
 
 //uninitalised pointers to SPI objects
-SPIClass * vspi = NULL;
+#ifdef ARMCONTROLLER   
+  SPIClass * vspi = NULL;
+#endif
 SPIClass * hspi = NULL;
 
 // code running on Core #0
@@ -116,17 +118,22 @@ void SensorController::sensorsCoreLoop()
 {
 	while (true)
 	{
+   
 #ifdef ARMCONTROLLER   
     potSPICmd();
 #else
 		// update encoder and current sensor data
+   //max speed 1.2khz = 1.2m/s
+   //min speed 12hz = .012m/s
+   digitalWrite(21,HIGH);
 		for (int i = 0; i < NUM_CHASSIS_MOTORS; i++)
 		{
-			//deltaTicks[i] = encoders[i]->readEncoder();
-			speedValues[i] = (double)(deltaTicks[i])/ENCODER_TIME;
-
+			deltaTicks[i] = encoders[i].getCountRaw();
+      encoders[i].clearCount();
+			speedValues[i] = (double)(deltaTicks[i])/10;
 			currentValues[i] = analogRead(CURRENT_IN[i]);
 		}
+   digitalWrite(21,LOW);
    
 #endif
     CurrentSPICmd();
@@ -138,7 +145,7 @@ void SensorController::sensorsCoreLoop()
 void SensorController::setupSensors(void* args)
 {
 	// create RotaryEncoder objects
-    
+   pinMode(21, OUTPUT); //set up spark power relay  
 	for (int i = 0; i < NUM_CHASSIS_MOTORS; i++)
 	{
 		

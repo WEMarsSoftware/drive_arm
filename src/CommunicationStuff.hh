@@ -12,8 +12,8 @@
 #include "SensorController.hh"
 
 // INFO FOR LOCAL ROUTER
-const char* ssid = "NETGEAR83";
-const char* password = "newunit583";
+const char* ssid = "WE MARS Rover";
+const char* password = "westill1";
 
 // COMMUNICATION CONSTANTS
 AsyncWebServer server(80);
@@ -158,6 +158,7 @@ void inline setupESPServer(void * args)
                 + "\",\"Speed-Right-0\":\"" + String(SensorController::potVals[3])
                 + "\",\"Speed-Right-1\":\"" + String(SensorController::potVals[4])
                 + "\",\"Speed-Right-2\":\"" + String(SensorController::potVals[5]) 
+                + "\",\"ticks\":\"" + String(SensorController::deltaTicks[0])
                 + "\"}";
         request->send(200, "text/plain", response);
    });

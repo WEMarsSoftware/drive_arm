@@ -47,6 +47,8 @@ void setup()
   Serial.begin(115200);
 #endif
 
+  
+
   // setup electrical stuff
   for (int i = 0; i < NUM_MOTORS_PER_SIDE; i++) {
     setupElec(LEFT_DRIVE_PINS[i], LEFT_DRIVE_CHANNELS[i]);
@@ -83,4 +85,7 @@ void setup()
    SensorController::setupSensors(nullptr);
 }
 
-void loop() { /* Intentionally empty. Required for Asynchronous Web Server. */ }
+void loop() 
+  { /* Intentionally empty. Required for Asynchronous Web Server. */
+    
+  }

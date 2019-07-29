@@ -88,6 +88,9 @@ void moveMotors(int left, int right){
     Serial.print(rightDriveTrain[i]);
     Serial.print(" Value: ");
     Serial.println(right);
+    
+    
+    
 #endif
 	}
 
