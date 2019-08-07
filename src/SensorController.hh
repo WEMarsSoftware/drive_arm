@@ -46,7 +46,7 @@ public:
 	// pin assignments
 	static int A_PINS[NUM_CHASSIS_MOTORS];
 	static int B_PINS[NUM_CHASSIS_MOTORS];
-	static int CURRENT_IN[NUM_CHASSIS_MOTORS];
+	//static int CURRENT_IN[NUM_CHASSIS_MOTORS];
 
   // SPI constants
   static const int HSPI_CLK;
@@ -88,7 +88,7 @@ ESP32Encoder SensorController::encoders[NUM_CHASSIS_MOTORS];
 // pin assignments temporary
 int SensorController::A_PINS[NUM_CHASSIS_MOTORS] = {36, 34, 32, 25, 26, 19};
 int SensorController::B_PINS[NUM_CHASSIS_MOTORS] = {39, 35, 33, 23, 27, 18};
-int SensorController::CURRENT_IN[NUM_CHASSIS_MOTORS] = {9, 10, 11, 19, 18, 5};
+//int SensorController::CURRENT_IN[NUM_CHASSIS_MOTORS] = {9, 10, 11, 19, 18, 5};
 int SensorController::deltaTicks[NUM_CHASSIS_MOTORS] = {};
 
 // SPI constants
@@ -108,7 +108,7 @@ const int SensorController::CAN_R = 22;
 const int SensorController::CAN_D = 21;
 
 // constants
-const int SensorController::CORE_LOOP_DELAY = 10;
+const int SensorController::CORE_LOOP_DELAY = 9;
 const int SensorController::ENCODER_TIME = 1000;
 
 // temp array for reading encoder ticks
@@ -133,7 +133,7 @@ void SensorController::sensorsCoreLoop()
 			deltaTicks[i] = encoders[i].getCountRaw();
       encoders[i].clearCount();
 			speedValues[i] = (double)(deltaTicks[i])/10;
-			currentValues[i] = analogRead(CURRENT_IN[i]);
+			//currentValues[i] = analogRead(CURRENT_IN[i]);
 		}
    //digitalWrite(21,LOW);
    
@@ -207,20 +207,33 @@ void SensorController::potSPICmd() {
 #endif
 
 // Update data from current sensors
-void SensorController::CurrentSPICmd() {
+void SensorController::CurrentSPICmd()
+{
+  //max11628 powers up in mode 10 and all other are set to zero
+  //using mode ten we need ot send a Conversion byte then wait 1ms and read all six a/d channels (autoINC starting at 0(lsb,msb) to N)
+  //Conversion byte = 1,0110,00,0 : msb bit = 1 to isgnify it is a Conversion bye, n = 6 , scann = 0 so we sscan 0 to N: = 0xB0
   byte address = 0;
+  
+  hspi->beginTransaction(SPISettings(spiClk, MSBFIRST, SPI_MODE0));
+  digitalWrite(HSPI_CS_CURR, LOW);
+  hspi->transfer(0xB0);
+  digitalWrite(HSPI_CS_CURR, HIGH);
+  hspi->endTransaction();
+  delay(1);
   for (; address < NUM_CHASSIS_MOTORS; address++) {  
     hspi->beginTransaction(SPISettings(spiClk, MSBFIRST, SPI_MODE0));
     digitalWrite(HSPI_CS_CURR, LOW);
-    hspi->transfer(address);
-
-    // see this thread about reading returned value http://forum.arduino.cc/index.php?topic=260836.0
+    //hspi->transfer(address);
     byte retVal = hspi->transfer(0);
     currentValues[address]= (int)retVal;
+    // see this thread about reading returned value http://forum.arduino.cc/index.php?topic=260836.0
+    retVal = hspi->transfer(0);
+    currentValues[address]= (int)retVal;
 
-    digitalWrite(HSPI_CS_CURR, HIGH);
+    
     hspi->endTransaction();
   }
+  digitalWrite(HSPI_CS_CURR, HIGH);
 }
 
 #endif
