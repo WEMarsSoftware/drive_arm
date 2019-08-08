@@ -285,6 +285,7 @@ void SensorController::CurrentResetCmd()
 }
 
 
+
 // Update data from current sensors
 void SensorController::CurrentSPICmd()
 {
