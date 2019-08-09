@@ -12,8 +12,9 @@
 //const char* ssid = "WE MARS Rover";
 //const char* password = "westill1";
 
-String controller1_data = "0,0,0,0,0";
-String controller2_data = "1,0,0,0,0";
+String controller1_data = {0,0,0,0,0}; //btnMap, axis1, axis2, axis3, axis4
+String controller2_data = {0,0,0,0,0}; //btnMap, axis1, axis2, axis3, axis4
+
 
 String strLeftRight;
 String strForwardBack;
@@ -62,24 +63,35 @@ void onWsEvent(AsyncWebSocket * server, AsyncWebSocketClient * client, AwsEventT
   //if data has been recieved
   else if(type == WS_EVT_DATA){
     bool flag = true;
-    char temp[len];
+    String tempMessage;
+    
     
     //translate data into string
     for(int i=0; i < len; i++) {
        if('_' != (char)data[i] && flag){
-          temp[i] = (char)data[i];  
-       }
-       else if (flag){
-          flag = false;
-          temp[i] = ',';
+          tempMessage += String((char)data[i]);  
        }
        else{
-          temp[i] = '_'; 
+          break;
        }
     }
 
     GPWnumPings++;
-    controller1_data = temp; //save controller data
+
+    int id = getValue(tempMessage, ',',0);
+    int tempData[5];
+    for(int a = 0; a < 5; a++){
+      tempData = getValue(tempMessage,',',a+1);
+    }
+
+    if(id == 0){
+      controller1_data = tempData;
+    }
+    else if(id == 1){
+      controller2_data = tempData;
+    }
+    
+    //old drive code, didn't delete because don't want to break
     strLeftRight = getValue(controller1_data, ',', 0);
     strForwardBack = getValue(controller1_data, ',', 1);
     iLeftRight = strLeftRight.toInt();
@@ -139,6 +151,28 @@ void writeServer(String message){
   if (globalClient){
     globalClient->text(message);
   }
-} 
+}
+
+//returns if buttonID of 
+bool isBtnPressed(byte controller, int buttonID){
+
+   int btnMap; 
+
+   if(controller = 1){
+      btnMap = controller1_data[0];
+   }
+   else{
+      btnMap = controller2_data[0];
+   }
+   
+   int mask = 1 << buttonID;
+   int maskedBtn = mask & btnMap;
+   if(maskedBtn == mask){
+    return true;
+   }
+   else{
+    return false;
+   }
+}
 
 #endif
