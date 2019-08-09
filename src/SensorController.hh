@@ -3,9 +3,9 @@
 #ifndef SENSOR_CONTROLLER
 #define SENSOR_CONTROLLER
 
-#define ARMCONTROLLER 1
+//#define ARMCONTROLLER 1
 #define GPIO 1
-//#define DRIVECONTROLLER 1
+#define DRIVECONTROLLER 1
 
 
 #include "Arduino.h"

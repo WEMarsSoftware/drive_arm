@@ -1,7 +1,32 @@
+/*
+ * GamepadWebsocket.h
+ * Kyle Inzunza
+ */
+
+ /*
+ XBOX button layout
+
+0 A
+1 B
+2 X
+3 Y
+4 LB
+5 RB
+6 LT
+7 RT
+8 BACK 
+9 START
+10 L AXIS
+11 R AXIS
+12 DPAD up
+13 DPAD down
+14 DPAD left
+15 DPAD right
+16 POWER
+*/
+
 #ifndef websocketesp_h
 #define websocketesp_h
-
-
 
 #include "Arduino.h"
 #include <WiFi.h>
@@ -27,6 +52,8 @@ int iWorkingLeft;
 int iWorkingRight;
 
 int GPWnumPings;
+
+bool gp_connected = false; //if websocket is connected
 
 // COMMUNICATION CONSTANTS
 //AsyncWebServer server(80);
@@ -54,13 +81,19 @@ void onWsEvent(AsyncWebSocket * server, AsyncWebSocketClient * client, AwsEventT
 
   //if the websocket has connected
   if(type == WS_EVT_CONNECT){
+    #ifdef DEBUG
     Serial.println("Websocket client connection received");
+    #endif
     globalClient = client; //declare client
+    gp_connected = true;
   }
   //if the websocket has disconnected
   else if(type == WS_EVT_DISCONNECT){
+    #ifdef DEBUG
     Serial.println("Client disconnected");
+    #endif
     globalClient = NULL; //to avoid errors
+    gp_connected = false;
   }
   //if data has been recieved
   else if(type == WS_EVT_DATA){
@@ -92,6 +125,12 @@ void onWsEvent(AsyncWebSocket * server, AsyncWebSocketClient * client, AwsEventT
     else if(id == 1){
       controller2_data = tempData;
     }
+
+    //remote turn off
+    if(turnOffState()){
+      turnOffSpike();
+    }
+    
     
     //old drive code, didn't delete because don't want to break
     strLeftRight = getValue(controller1_data, ',', 0);
@@ -175,6 +214,13 @@ bool isBtnPressed(byte controller, int buttonID){
    else{
     return false;
    }
+}
+
+//checks if either of the controllers have selected to turn off rover
+bool turnOffState(){
+  bool ctr1 = (isBtnPressed(1,8) && isBtnPressed(1,9));
+  bool ctr2 = (isBtnPressed(2,8) && isBtnPressed(1,9));
+  return ctr1 || ctr2; 
 }
 
 #endif

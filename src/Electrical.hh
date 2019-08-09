@@ -35,6 +35,15 @@ void setupElec(int pin, int channel, int freq=VICTOR_PWM_IN_FREQUENCY, int bits=
 	ledcSetup(channel, freq, bits);
 }
 
+void turnOnSpike(int pin){
+  ledcWrite(pin, MAX_PWM_OUT);
+}
+
+void turnOffSpike(int pin, int channel){
+  ledcWrite(pin, (MAX_PWM_OUT + MIN_PWM_OUT)/2);
+}
+
+
 /**
  * Attach channels to LEFT or RIGHT drivetrains.
  * This will just overwrite the -1 defaults.
@@ -90,8 +99,7 @@ void moveMotors(int left, int right){
     Serial.print(rightDriveTrain[i]);
     Serial.print(" Value: ");
     Serial.println(right);
-    
-    
+   
     
 #endif
 	}
