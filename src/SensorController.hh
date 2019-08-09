@@ -3,8 +3,9 @@
 #ifndef SENSOR_CONTROLLER
 #define SENSOR_CONTROLLER
 
-//#define ARMCONTROLLER 1
+#define ARMCONTROLLER 1
 #define GPIO 1
+//#define DRIVECONTROLLER 1
 
 
 #include "Arduino.h"
@@ -28,6 +29,7 @@ const int spiClk = 1000000; // 1 MHz
   SPIClass * vspi = NULL;
 #endif
 SPIClass * hspi = NULL;
+
 
 // code running on Core #0
 class SensorController
@@ -129,7 +131,8 @@ void SensorController::sensorsCoreLoop()
 		// update encoder and current sensor data
    //max speed 1.2khz = 1.2m/s
    //min speed 12hz = .012m/s
-   digitalWrite(21,HIGH);
+    #ifdef DRIVECONTROLLER
+    digitalWrite(21,HIGH);
 		for (int i = 0; i < NUM_CHASSIS_MOTORS; i++)
 		{
 			deltaTicks[i] = encoders[i].getCountRaw();
@@ -137,6 +140,7 @@ void SensorController::sensorsCoreLoop()
 			speedValues[i] = (double)(deltaTicks[i])/10;
 			//currentValues[i] = analogRead(CURRENT_IN[i]);
 		}
+   #endif
    //digitalWrite(21,LOW);
    
 #endif
@@ -152,13 +156,13 @@ void SensorController::sensorsCoreLoop()
 void SensorController::setupSensors(void* args)
 {
 	// create RotaryEncoder objects
-   pinMode(21, OUTPUT); //set up spark power relay  
+  //pinMode(21, OUTPUT); //set up spark power relay  
+	#ifdef DRIVECONTROLLER
 	for (int i = 0; i < NUM_CHASSIS_MOTORS; i++)
 	{
-		
      encoders[i].attachHalfQuad(A_PINS[i], B_PINS[i]);
-      
 	}
+  #endif
 
    // initialise two instances of the SPIClass attached to VSPI and HSPI respectively
   #ifdef ARMCONTROLLER   
@@ -179,6 +183,19 @@ void SensorController::setupSensors(void* args)
   //set up slave select pins as outputs
  #ifdef ARMCONTROLLER 
   pinMode(VSPI_CS_POT, OUTPUT);
+
+
+  //setup:   HSPI A/d  set setup resgister to 
+  digitalWrite(HSPI_CS_CURR, HIGH);
+  digitalWrite(VSPI_CS_POT, HIGH);
+  digitalWrite(HSPI_CS_IO, HIGH);
+  vspi->beginTransaction(SPISettings(spiClk, MSBFIRST, SPI_MODE0));
+  digitalWrite(VSPI_CS_POT, LOW);
+  vspi->transfer(0x68);
+  digitalWrite(VSPI_CS_POT, HIGH);
+  hspi->endTransaction();
+  delay(1);
+  
  #endif
   pinMode(HSPI_CS_CURR, OUTPUT);
   pinMode(HSPI_CS_IO, OUTPUT);
@@ -223,24 +240,29 @@ void SensorController::setupSensors(void* args)
 #ifdef ARMCONTROLLER 
 // Update data from pots
 void SensorController::potSPICmd() {
-  byte address = 0; // junk data to illustrate usage
-
-  // query MAX11628EEE ADC for 8 channels of data
-  for (; address < NUM_CHASSIS_MOTORS; address++) {
-    
+   byte address = 0;
+  
+  digitalWrite(VSPI_CS_POT, HIGH);
+  vspi->beginTransaction(SPISettings(spiClk, MSBFIRST, SPI_MODE0));
+  digitalWrite(VSPI_CS_POT, LOW);
+  vspi->transfer(0xB0);
+  digitalWrite(VSPI_CS_POT, HIGH);
+  vspi->endTransaction();
+  delay(1);
+  for (; address < NUM_CHASSIS_MOTORS; address++) {  
     vspi->beginTransaction(SPISettings(spiClk, MSBFIRST, SPI_MODE0));
-    digitalWrite(VSPI_CS_POT, LOW); // select chip
- 
-    vspi->transfer(address);  
-
+    digitalWrite(VSPI_CS_POT, LOW);
+    //vspi->transfer(address);
+    byte retVal = vspi->transfer(0);
+    potVals[address]= (int)retVal << 8;
     // see this thread about reading returned value http://forum.arduino.cc/index.php?topic=260836.0
-    byte returnedValue = vspi->transfer(0);
-    potVals[address] = (int)returnedValue;
+    retVal = vspi->transfer(0);
+    potVals[address] |= (int)retVal;
+
     
-    digitalWrite(VSPI_CS_POT, HIGH); // signal end of transfer
     vspi->endTransaction();
-    
   }
+  digitalWrite(VSPI_CS_POT, HIGH);
 }
 #endif
 

@@ -97,6 +97,7 @@ void loop()
   { 
     //update every 50ms
     if(millis()-armPositionTimer > 50){
+      armPositionTimer = millis();
       armControl();
     }
   }
