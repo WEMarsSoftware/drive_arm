@@ -4,6 +4,8 @@
 #define SENSOR_CONTROLLER
 
 //#define ARMCONTROLLER 1
+#define GPIO 1
+
 
 #include "Arduino.h"
 #include "ESP32Encoder.h"
@@ -34,7 +36,7 @@ public:
 	// let WiFi callback access these directly
 	static int currentValues[NUM_CHASSIS_MOTORS];
 	static int speedValues[NUM_CHASSIS_MOTORS];
-
+  static int siCurrentsResetByte;// bit = 0 motor 0 etc.
 	// RotaryEncoder library will count number of ticks in specified time length
 	// specified in constructor (last parameter in microseconds)
 	static ESP32Encoder encoders[NUM_CHASSIS_MOTORS];
@@ -44,7 +46,7 @@ public:
 	// pin assignments
 	static int A_PINS[NUM_CHASSIS_MOTORS];
 	static int B_PINS[NUM_CHASSIS_MOTORS];
-	static int CURRENT_IN[NUM_CHASSIS_MOTORS];
+	//static int CURRENT_IN[NUM_CHASSIS_MOTORS];
 
   // SPI constants
   static const int HSPI_CLK;
@@ -75,9 +77,11 @@ public:
   static void potSPICmd();
 #endif
   static void CurrentSPICmd();
+  static void CurrentResetCmd();
 };
 
 // link statics
+int SensorController::siCurrentsResetByte = 0;
 int SensorController::currentValues[NUM_CHASSIS_MOTORS] = {};
 int SensorController::speedValues[NUM_CHASSIS_MOTORS] = {};
 int SensorController::potVals[NUM_CHASSIS_MOTORS] = {};
@@ -86,7 +90,7 @@ ESP32Encoder SensorController::encoders[NUM_CHASSIS_MOTORS];
 // pin assignments temporary
 int SensorController::A_PINS[NUM_CHASSIS_MOTORS] = {36, 34, 32, 25, 26, 19};
 int SensorController::B_PINS[NUM_CHASSIS_MOTORS] = {39, 35, 33, 23, 27, 18};
-int SensorController::CURRENT_IN[NUM_CHASSIS_MOTORS] = {9, 10, 11, 19, 18, 5};
+//int SensorController::CURRENT_IN[NUM_CHASSIS_MOTORS] = {9, 10, 11, 19, 18, 5};
 int SensorController::deltaTicks[NUM_CHASSIS_MOTORS] = {};
 
 // SPI constants
@@ -106,7 +110,7 @@ const int SensorController::CAN_R = 22;
 const int SensorController::CAN_D = 21;
 
 // constants
-const int SensorController::CORE_LOOP_DELAY = 10;
+const int SensorController::CORE_LOOP_DELAY = 9;
 const int SensorController::ENCODER_TIME = 1000;
 
 // temp array for reading encoder ticks
@@ -131,12 +135,15 @@ void SensorController::sensorsCoreLoop()
 			deltaTicks[i] = encoders[i].getCountRaw();
       encoders[i].clearCount();
 			speedValues[i] = (double)(deltaTicks[i])/10;
-			currentValues[i] = analogRead(CURRENT_IN[i]);
+			//currentValues[i] = analogRead(CURRENT_IN[i]);
 		}
    //digitalWrite(21,LOW);
    
 #endif
     CurrentSPICmd();
+#ifdef GPIO    
+    CurrentResetCmd();
+#endif
 
 		delay(CORE_LOOP_DELAY);
   } 
@@ -175,6 +182,39 @@ void SensorController::setupSensors(void* args)
  #endif
   pinMode(HSPI_CS_CURR, OUTPUT);
   pinMode(HSPI_CS_IO, OUTPUT);
+
+  //setup:   HSPI A/d  set setup resgister to 
+  digitalWrite(HSPI_CS_CURR, HIGH);
+  digitalWrite(HSPI_CS_IO, HIGH);
+  hspi->beginTransaction(SPISettings(spiClk, MSBFIRST, SPI_MODE0));
+  digitalWrite(HSPI_CS_CURR, LOW);
+  hspi->transfer(0x68);
+  digitalWrite(HSPI_CS_CURR, HIGH);
+  hspi->endTransaction();
+  delay(1);
+  
+#ifdef GPIO
+  //setup:   GPIO
+  //IODIR – I/O DIRECTION REGISTER (ADDR 0x00) set to 00
+  //IOCON – I/O EXPANDER CONFIGURATION REGISTER (ADDR 0x05) set to 0x38
+  digitalWrite(HSPI_CS_CURR, HIGH);
+  digitalWrite(HSPI_CS_IO, HIGH);
+  hspi->beginTransaction(SPISettings(spiClk, MSBFIRST, SPI_MODE0));
+  digitalWrite(HSPI_CS_IO, LOW);
+  hspi->transfer(0x40); //Device Opcode write
+  hspi->transfer(0x00); //IODIR
+  hspi->transfer(0x00); //set to 00
+  digitalWrite(HSPI_CS_IO, HIGH);
+  hspi->endTransaction();
+
+  hspi->beginTransaction(SPISettings(spiClk, MSBFIRST, SPI_MODE0));
+  digitalWrite(HSPI_CS_IO, LOW);
+  hspi->transfer(0x40); //Device Opcode write
+  hspi->transfer(0x05); //IOCON
+  hspi->transfer(0x38); //set to 0x38
+  digitalWrite(HSPI_CS_IO, HIGH);
+  hspi->endTransaction();
+#endif
   
 	// don't let this task end
 	sensorsCoreLoop();
@@ -204,21 +244,77 @@ void SensorController::potSPICmd() {
 }
 #endif
 
+
+
+//reset the current over loads on current monitor brds 
+void SensorController::CurrentResetCmd()
+{
+  //mcp23s08 powers up with:
+  //**IODIR – I/O DIRECTION REGISTER (ADDR 0x00) = ff needs to be set to 00
+  //IPOL – INPUT POLARITY PORT REGISTER (ADDR 0x01) = 0
+  //GPINTEN – INTERRUPT-ON-CHANGE PINS (ADDR 0x02) = 0
+  //DEFVAL – DEFAULT VALUE REGISTER (ADDR 0x03) = 0
+  //INTCON – INTERRUPT-ON-CHANGE CONTROL REGISTER (ADDR 0x04)  = 0
+  //**IOCON – I/O EXPANDER CONFIGURATION REGISTER (ADDR 0x05) = 0 
+  //GPPU – GPIO PULL-UP RESISTOR REGISTER (ADDR 0x06) = 0 pull up disabled
+  //INTF – INTERRUPT FLAG REGISTER (ADDR 0x07) = 0 no interrupt are pending
+  //INTCAP – INTERRUPT CAPTURED VALUE FOR PORT REGISTER (ADDR 0x08)  read only
+  //GPIO – GENERAL PURPOSE I/O PORT REGISTER (ADDR 0x09) = 0 ( use to read pins but we don't need this on this project
+  //**OLAT – OUTPUT LATCH REGISTER 0 (ADDR 0x0A) = 0 (outputs low)
+  
+  //registers with ** are needed with this code
+  //setup:
+  //IODIR – I/O DIRECTION REGISTER (ADDR 0x00) set to 00
+  //IOCON – I/O EXPANDER CONFIGURATION REGISTER (ADDR 0x05) set to 0x38
+
+  //This function writes cc to the OLAT – OUTPUT LATCH REGISTER 0 (ADDR 0x0A)
+  
+ 
+  digitalWrite(HSPI_CS_CURR, HIGH);
+  digitalWrite(HSPI_CS_IO, HIGH);
+  hspi->beginTransaction(SPISettings(spiClk, MSBFIRST, SPI_MODE0));
+  digitalWrite(HSPI_CS_IO, LOW);
+  hspi->transfer(0x40); //Device Opcode write
+   digitalWrite(HSPI_CS_IO, LOW);
+  hspi->transfer(0x09); //OLAT
+   digitalWrite(HSPI_CS_IO, LOW);
+  siCurrentsResetByte ^= 1; 
+  hspi->transfer(siCurrentsResetByte); //set to 00
+  digitalWrite(HSPI_CS_IO, HIGH);
+  hspi->endTransaction();
+}
+
+
+
 // Update data from current sensors
-void SensorController::CurrentSPICmd() {
+void SensorController::CurrentSPICmd()
+{
+  //max11628 powers up in mode 10 and all other are set to zero
+  //using mode ten we need ot send a Conversion byte then wait 1ms and read all six a/d channels (autoINC starting at 0(lsb,msb) to N)
+  //Conversion byte = 1,0110,00,0 : msb bit = 1 to isgnify it is a Conversion bye, n = 6 , scann = 0 so we sscan 0 to N: = 0xB0
   byte address = 0;
+  
+  digitalWrite(HSPI_CS_IO, HIGH);
+  hspi->beginTransaction(SPISettings(spiClk, MSBFIRST, SPI_MODE0));
+  digitalWrite(HSPI_CS_CURR, LOW);
+  hspi->transfer(0xB0);
+  digitalWrite(HSPI_CS_CURR, HIGH);
+  hspi->endTransaction();
+  delay(1);
   for (; address < NUM_CHASSIS_MOTORS; address++) {  
     hspi->beginTransaction(SPISettings(spiClk, MSBFIRST, SPI_MODE0));
     digitalWrite(HSPI_CS_CURR, LOW);
-    hspi->transfer(address);
-
-    // see this thread about reading returned value http://forum.arduino.cc/index.php?topic=260836.0
+    //hspi->transfer(address);
     byte retVal = hspi->transfer(0);
     currentValues[address]= (int)retVal;
+    // see this thread about reading returned value http://forum.arduino.cc/index.php?topic=260836.0
+    retVal = hspi->transfer(0);
+    currentValues[address]= (int)retVal;
 
-    digitalWrite(HSPI_CS_CURR, HIGH);
+    
     hspi->endTransaction();
   }
+  digitalWrite(HSPI_CS_CURR, HIGH);
 }
 
 #endif

@@ -8,14 +8,17 @@
 #include "ESPAsyncWebServer.h"
 #include <SPIFFS.h>
 
-
-
 #include "Electrical.hh"
 #include "SensorController.hh"
 
+
+
 // INFO FOR LOCAL ROUTER
-const char* ssid = "WE MARS Rover";
-const char* password = "westill1";
+//const char* ssid = "WE MARS Rover";
+//const char* password = "westill1";
+const char* ssid = "SM-G925W81765";
+const char* password = "klts9796";
+
 
 // COMMUNICATION CONSTANTS
 AsyncWebServer server(80);
