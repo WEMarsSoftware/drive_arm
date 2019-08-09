@@ -6,31 +6,21 @@
 
 byte joints = 5;
 float deadZone = .5;
-float armPosition[joints]; //most recent intentional position of arm, must update every time user moves joint
-int pmwStart = 100; //TODO: fix
-int pmwCompesation[] = {pwmStart,pwmStart,pwmStart,pwmStart,pwmStart};
-float pwmStep = 5;
+float armSetpoint[joints]; //most recent intentional position of arm, must update every time user moves joint //setpoint
+float p_value = ;
 
 void armControl(){
   //loop through joints
   for(int a = 0; a < joints; a++){
-    //if not at desired position
-    if (abs(armPosition[a]-potVals[a]) > deadZone){
-      if(armPosition[s] - potVals[a] > 0){
-        pwmCompensation[a] -= pwmStep;
-      }
-      else{
-        pwmCompensation[a] += pwmStep;
-      }
-    }
-    //move at set pwmCompensation
+      float error = armSetpoint[a] - potVals[a];
+      float motorSpeed = p_value*error;
     }
   }
 }
 
 //call every time user updates joint position
 updateJoint(int joint){
-  armPosition[joint] = potVals[joint]
+  armSetpoint[joint] = potVals[joint]
   pwmCompensation[joint] = pmwStart; //reset
 }
 
