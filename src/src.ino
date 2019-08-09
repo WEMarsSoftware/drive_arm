@@ -17,6 +17,9 @@ const int RIGHT_DRIVE_PINS[] = {16, 17, 5};
 
 const int NUM_MOTORS_PER_SIDE = 3;
 
+int armPositionTimer;
+
+
 // required for AsynchronousWebServer to run on alternate core
 TaskHandle_t Task1;
 
@@ -84,9 +87,14 @@ void setup()
 
   // run sensor ISR on main core
    SensorController::setupSensors(nullptr);
+
+   armPositionTimer = millis();
 }
 
 void loop() 
-  { /* Intentionally empty. Required for Asynchronous Web Server. */
-    
+  { 
+    //update every 50ms
+    if(millis()-armPositionTimer > 50){
+      
+    }
   }
