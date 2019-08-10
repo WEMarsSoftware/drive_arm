@@ -4,6 +4,7 @@
 
 
 #include "Arduino.h"
+#include "ArmControl.h"
 #include <WiFi.h>
 #include "ESPAsyncWebServer.h"
 #include "SPIFFS.h"
@@ -113,7 +114,7 @@ void onWsEvent(AsyncWebSocket * server, AsyncWebSocketClient * client, AwsEventT
       //controller1_data = tempData;
     }
     else if (id == 1) {
-      int cmax = 100;
+      int xmax = 100;
       int cmin = -100;
       int forwards = 50;
       int backwards = -50;
@@ -121,34 +122,34 @@ void onWsEvent(AsyncWebSocket * server, AsyncWebSocketClient * client, AwsEventT
 
       //TODO: change into for loop
       if (btnPressed(2, 0)) {
-        ledcWrite(ARM_CHANNELS[0], map(forwards,cmin,xmax,MIN_PWM_OUT,MAX_PWM_OUT);
+        ledcWrite(ARM_CHANNELS[0], map(forwards,cmin,xmax,MIN_PWM_OUT,MAX_PWM_OUT));
       }
       else if (btnPressed(2, 1)) {
-        ledcWrite(ARM_CHANNELS[0], map(backwards,cmin,xmax,MIN_PWM_OUT,MAX_PWM_OUT);
+        ledcWrite(ARM_CHANNELS[0], map(backwards,cmin,xmax,MIN_PWM_OUT,MAX_PWM_OUT));
       }
       else if (btnPressed(2, 2)) {
-        ledcWrite(ARM_CHANNELS[1], map(forwards,cmin,xmax,MIN_PWM_OUT,MAX_PWM_OUT);
+        ledcWrite(ARM_CHANNELS[1], map(forwards,cmin,xmax,MIN_PWM_OUT,MAX_PWM_OUT));
       }
       else if (btnPressed(2, 3)) {
-        ledcWrite(ARM_CHANNELS[1], map(backwards,cmin,xmax,MIN_PWM_OUT,MAX_PWM_OUT);
+        ledcWrite(ARM_CHANNELS[1], map(backwards,cmin,xmax,MIN_PWM_OUT,MAX_PWM_OUT));
       }
       else if (btnPressed(2, 4)) {
-        ledcWrite(ARM_CHANNELS[2], map(forwards,cmin,xmax,MIN_PWM_OUT,MAX_PWM_OUT);
+        ledcWrite(ARM_CHANNELS[2], map(forwards,cmin,xmax,MIN_PWM_OUT,MAX_PWM_OUT));
       }
       else if (btnPressed(2, 5)) {
-        ledcWrite(ARM_CHANNELS[2], map(backwards,cmin,xmax,MIN_PWM_OUT,MAX_PWM_OUT);
+        ledcWrite(ARM_CHANNELS[2], map(backwards,cmin,xmax,MIN_PWM_OUT,MAX_PWM_OUT));
       }
       else if (btnPressed(2, 6)) {
-        ledcWrite(ARM_CHANNELS[3], map(forwards,cmin,xmax,MIN_PWM_OUT,MAX_PWM_OUT);
+        ledcWrite(ARM_CHANNELS[3], map(forwards,cmin,xmax,MIN_PWM_OUT,MAX_PWM_OUT));
       }
       else if (btnPressed(2, 7)) {
-        ledcWrite(ARM_CHANNELS[3], map(backwards,cmin,xmax,MIN_PWM_OUT,MAX_PWM_OUT);
+        ledcWrite(ARM_CHANNELS[3], map(backwards,cmin,xmax,MIN_PWM_OUT,MAX_PWM_OUT));
       }
       else if (btnPressed(2, 8)) {
-        ledcWrite(ARM_CHANNELS[4], map(forwards,cmin,xmax,MIN_PWM_OUT,MAX_PWM_OUT);
+        ledcWrite(ARM_CHANNELS[4], map(forwards,cmin,xmax,MIN_PWM_OUT,MAX_PWM_OUT));
       }
       else if (btnPressed(2, 9)) {
-        ledcWrite(ARM_CHANNELS[4], map(backwards,cmin,xmax,MIN_PWM_OUT,MAX_PWM_OUT);
+        ledcWrite(ARM_CHANNELS[4], map(backwards,cmin,xmax,MIN_PWM_OUT,MAX_PWM_OUT));
       }
       
     }

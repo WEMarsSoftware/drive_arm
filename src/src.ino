@@ -63,7 +63,7 @@ void setup()
 
     //setDriveChannel(i, LEFT_DRIVE_CHANNELS[i]);
     //setDriveChannel(i+3, RIGHT_DRIVE_CHANNELS[i]);
-    //setupElec(ARM_PINS[i],ARM_CHANNELS[i]);
+    setupElec(ARM_PINS[i],ARM_CHANNELS[i]);
   }
 
   
