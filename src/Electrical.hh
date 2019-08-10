@@ -8,8 +8,9 @@
 #ifndef ELECTRICAL_HH
 #define ELECTRICAL_HH
 
-const int PERCENTAGE_0 = -100;
-const int PERCENTAGE_100 = 100;
+//max and min of axes
+const int PERCENTAGE_0 = -32767;
+const int PERCENTAGE_100 = 32767;
 
 // 63 is full reverse, 153 is neutral, 243 is max forwards
 const int MIN_PWM_OUT = 55;

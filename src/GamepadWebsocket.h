@@ -59,6 +59,37 @@ int GPWnumPings;
 AsyncWebSocket ws("/ws");
 AsyncWebSocketClient * globalClient = NULL; //client for server
 
+//get left drive train value
+int getArcadeLeft(int x_axis,int y_axis){
+  int val = y_axis + x_axis;
+  
+  //cap value
+  if(val > PERCENTAGE_100){
+    val = PERCENTAGE_100;
+  }
+  else if(val < PERCENTAGE_0){
+    val = PERCENTAGE_0;
+  }
+
+  return val;
+}
+
+//get right drive train value
+int getArcadeRight(int x_axis,int y_axis){
+  int val = y_axis - x_axis;
+  
+  //cap value
+  if(val > PERCENTAGE_100){
+    val = PERCENTAGE_100;
+  }
+  else if(val < PERCENTAGE_0){
+    val = PERCENTAGE_0;
+  }
+
+  return val;
+}
+
+
 //returns if buttonID of 
 bool isBtnPressed(byte controller, int buttonID){
 
@@ -162,7 +193,8 @@ void onWsEvent(AsyncWebSocket * server, AsyncWebSocketClient * client, AwsEventT
     if(turnOffState()){
       //turnOffSpike();
     }
-    
+
+    moveMotors(getArcadeLeft(controller1_data[1],controller1_data[2]),getArcadeRight(controller1_data[3],controller1_data[4]));
     /*
     //old drive code, didn't delete because don't want to break
     strLeftRight = getValue(controller1_data, ',', 0);
