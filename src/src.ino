@@ -2,10 +2,10 @@
 #include "ESPAsyncWebServer.h"
 #include <SPIFFS.h>;
 
-
+#include "GamepadWebsocket.h"
 
 #include "CommunicationStuff.hh"
-#include "GamepadWebsocket.h"
+
 #include "Electrical.hh"
 #include "PreprocessorOptions.hh"
 #include "esp32-hal-ledc.h"
@@ -24,6 +24,8 @@ const int RIGHT_DRIVE_PINS[] = {16, 17, 5};
 const int NUM_MOTORS_PER_SIDE = 3;
 
 int armPositionTimer;
+
+void startServer();
 
 
 // required for AsynchronousWebServer to run on alternate core
@@ -55,9 +57,11 @@ void IRAM_ATTR onTimer() {
 
 void setup()
 {
-#ifdef DEBUG
+
   Serial.begin(115200);
-#endif
+
+
+  //siCurrentResetByte = 0xff;
 
   setupElec(SPIKE_PIN,SPIKE_CHANNEL); //setup spike for PCM
   turnOnSpike(); //turn on spike
@@ -104,6 +108,11 @@ void setup()
 
   // run sensor ISR on main core
    SensorController::setupSensors(nullptr);
+    /*
+   siCurrentResetByte = 0;
+   delay(1000);
+   siCurrentResetByte = 0xff;
+   */
 
 }
 

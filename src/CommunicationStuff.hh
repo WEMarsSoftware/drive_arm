@@ -11,6 +11,7 @@
 #include "Electrical.hh"
 #include "SensorController.hh"
 
+void startServer();
 
 
 // INFO FOR LOCAL ROUTER
@@ -27,7 +28,7 @@ AsyncWebServer server(80);
 
 #include "GamepadWebsocket.h"
 
-IPAddress staticIP(192,168,1,100);
+IPAddress staticIP(192,168,1,101);
 IPAddress gateway(192,168,1,1);
 IPAddress subnet(255,255,255,0);
 
@@ -64,8 +65,10 @@ void inline connectToWiFi()
   
     // WiFi.scanNetworks will return the number of networks found
     int n = WiFi.scanNetworks();
+    #ifdef DEBUG
     Serial.print(F("Number of networks  "));
     Serial.println(n);
+    #endif
 
     WiFi.begin(ssid, password);
     while (WiFi.status() != WL_CONNECTED) {
@@ -104,9 +107,9 @@ void inline setupESPServer(void * args)
         Serial.println("numParams " + String(numParams));
    
 #endif
- 
+ /*
       if (numParams != NUM_PARAMS) {
-        request->send(200, "text/plain", "Error: number of paramaters not as expected.");
+       request->send(200, "text/plain", "Error: number of paramaters not as expected.");
       }
 
       String left, right;
@@ -124,7 +127,7 @@ void inline setupESPServer(void * args)
        // set motor output signals
        moveMotors(left.toInt(), right.toInt());
        
-       
+       */
        // send response back with motor current vals
        // and pot positions in JSON
        // are both size 6 arrays

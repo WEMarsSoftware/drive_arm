@@ -11,6 +11,7 @@
 #include "Arduino.h"
 #include "ESP32Encoder.h"
 #include "SPI.h"
+#include "GamepadWebsocket.h"
 
 // Note: different than Arduino
 const int MAX_ANALOG_IN = 4095;
@@ -30,6 +31,7 @@ const int spiClk = 1000000; // 1 MHz
 #endif
 SPIClass * hspi = NULL;
 
+void writeServer(String message);
 
 // code running on Core #0
 class SensorController
@@ -135,7 +137,8 @@ void SensorController::sensorsCoreLoop()
   if(signalLightCounter > 100){
     signalLightCounter = 0;
 
-    Serial.print(gp_connected);
+
+    //Serial.print(gp_connected);
     //if websocket connected
     if(gp_connected)
     {
@@ -323,7 +326,7 @@ void SensorController::CurrentResetCmd()
    digitalWrite(HSPI_CS_IO, LOW);
   hspi->transfer(0x09); //OLAT
    digitalWrite(HSPI_CS_IO, LOW);
-  siCurrentsResetByte ^= 1; 
+  siCurrentsResetByte ^= 0xff; 
   hspi->transfer(siCurrentsResetByte); //set to 00
   digitalWrite(HSPI_CS_IO, HIGH);
   hspi->endTransaction();
