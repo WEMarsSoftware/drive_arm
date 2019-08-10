@@ -39,8 +39,8 @@
 //const char* ssid = "WE MARS Rover";
 //const char* password = "westill1";
 
-String controller1_data = {0,0,0,0,0}; //btnMap, axis1, axis2, axis3, axis4
-String controller2_data = {0,0,0,0,0}; //btnMap, axis1, axis2, axis3, axis4
+int controller1_data[] = {0,0,0,0,0}; //btnMap, axis1, axis2, axis3, axis4
+int controller2_data[] = {0,0,0,0,0}; //btnMap, axis1, axis2, axis3, axis4
 
 
 String strLeftRight;
@@ -59,6 +59,36 @@ bool gp_connected = false; //if websocket is connected
 //AsyncWebServer server(80);
 AsyncWebSocket ws("/ws");
 AsyncWebSocketClient * globalClient = NULL; //client for server
+
+//returns if buttonID of 
+bool isBtnPressed(byte controller, int buttonID){
+
+   int btnMap; 
+
+   if(controller = 1){
+      btnMap = controller1_data[0];
+   }
+   else{
+      btnMap = controller2_data[0];
+   }
+   
+   int mask = 1 << buttonID;
+   int maskedBtn = mask & btnMap;
+   if(maskedBtn == mask){
+    return true;
+   }
+   else{
+    return false;
+   }
+}
+
+
+//checks if either of the controllers have selected to turn off rover
+bool turnOffState(){
+  bool ctr1 = (isBtnPressed(1,8) && isBtnPressed(1,9));
+  bool ctr2 = (isBtnPressed(2,8) && isBtnPressed(1,9));
+  return ctr1 || ctr2; 
+}
 
 String getValue(String data, char separator, int index)
 {
@@ -113,17 +143,21 @@ void onWsEvent(AsyncWebSocket * server, AsyncWebSocketClient * client, AwsEventT
 
     GPWnumPings++;
 
-    int id = getValue(tempMessage, ',',0);
+    int id = getValue(tempMessage, ',',0).toInt();
     int tempData[5];
     for(int a = 0; a < 5; a++){
-      tempData = getValue(tempMessage,',',a+1);
+      tempData[a] = getValue(tempMessage,',',a+1).toInt();
     }
 
     if(id == 0){
-      controller1_data = tempData;
+      for(int b = 0; b < 5; b++){
+        controller1_data[b] = tempData[b];
+      }
     }
     else if(id == 1){
-      controller2_data = tempData;
+      for(int b = 0; b < 5; b++){
+        controller2_data[b] = tempData[b];
+      }
     }
 
     //remote turn off
@@ -131,7 +165,7 @@ void onWsEvent(AsyncWebSocket * server, AsyncWebSocketClient * client, AwsEventT
       turnOffSpike();
     }
     
-    
+    /*
     //old drive code, didn't delete because don't want to break
     strLeftRight = getValue(controller1_data, ',', 0);
     strForwardBack = getValue(controller1_data, ',', 1);
@@ -149,7 +183,7 @@ void onWsEvent(AsyncWebSocket * server, AsyncWebSocketClient * client, AwsEventT
     }
     
      moveMotors(iWorkingLeft, iWorkingRight);
-    
+    */
   }
 }
 
@@ -194,33 +228,5 @@ void writeServer(String message){
   }
 }
 
-//returns if buttonID of 
-bool isBtnPressed(byte controller, int buttonID){
-
-   int btnMap; 
-
-   if(controller = 1){
-      btnMap = controller1_data[0];
-   }
-   else{
-      btnMap = controller2_data[0];
-   }
-   
-   int mask = 1 << buttonID;
-   int maskedBtn = mask & btnMap;
-   if(maskedBtn == mask){
-    return true;
-   }
-   else{
-    return false;
-   }
-}
-
-//checks if either of the controllers have selected to turn off rover
-bool turnOffState(){
-  bool ctr1 = (isBtnPressed(1,8) && isBtnPressed(1,9));
-  bool ctr2 = (isBtnPressed(2,8) && isBtnPressed(1,9));
-  return ctr1 || ctr2; 
-}
 
 #endif

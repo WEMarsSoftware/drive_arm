@@ -20,7 +20,7 @@ const int MIN_ANALOG_IN = 0;
 // varies linearly with DC in
 const int NUM_CHASSIS_MOTORS = 6;
 
-const int MAX_CURRENT_IN = 33;
+const int MAX_CURRENT_IN = 20;
 
 const int spiClk = 1000000; // 1 MHz
 

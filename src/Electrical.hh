@@ -1,6 +1,7 @@
 #include "Arduino.h"
 #include "esp32-hal-ledc.h"
 #include "PreprocessorOptions.hh"
+#include "SensorController.hh"
 
 
 
@@ -13,6 +14,7 @@ const int PERCENTAGE_100 = 100;
 // 63 is full reverse, 153 is neutral, 243 is max forwards
 const int MIN_PWM_OUT = 55;
 const int MAX_PWM_OUT = 100;
+int limiter = 0; //amount to reduce max
 
 const int VICTOR_PWM_IN_FREQUENCY = 200;
 const int DEFAULT_BIT_RESOLUTION = 8;
@@ -39,8 +41,8 @@ void turnOnSpike(int pin){
   ledcWrite(pin, MAX_PWM_OUT);
 }
 
-void turnOffSpike(int pin, int channel){
-  ledcWrite(pin, (MAX_PWM_OUT + MIN_PWM_OUT)/2);
+void turnOffSpike(){
+  ledcWrite(21, (MAX_PWM_OUT + MIN_PWM_OUT)/2);
 }
 
 
@@ -76,6 +78,20 @@ void moveMotors(int left, int right){
 #ifdef DEBUG
   Serial.println("MOVING MOTORS");
 #endif
+
+  
+  //current limiting shenanigans
+  bool flag = false;
+  //loop through currents
+  for(int a = 0; a < 6; a++){
+    //if current is over
+    if(SensorController::currentValues[a] > MAX_CURRENT_IN){
+      flag = true;
+    }
+  }
+
+  //TODO: finish current limiting
+  
   
 	// (value, fromLow, fromHigh, toLow, toHigh)
 	left = map(left, PERCENTAGE_0, PERCENTAGE_100, MIN_PWM_OUT, MAX_PWM_OUT);

@@ -10,6 +10,10 @@
 #include "PreprocessorOptions.hh"
 #include "esp32-hal-ledc.h"
 
+#ifndef DEBUG
+#define DEBUG
+#endif
+
 // required for hal-ledc
 const int LEFT_DRIVE_CHANNELS[] = {1, 2, 3};
 const int RIGHT_DRIVE_CHANNELS[] = {4, 5, 6};
@@ -18,9 +22,9 @@ const int LEFT_DRIVE_PINS[] = {15, 2, 4};
 const int RIGHT_DRIVE_PINS[] = {16, 17, 5};
 
 const int SPIKE_PIN = 1; //need real spike pin
-const int SPIKE_CHANNEL = 7; 
+const int SPIKE_CHANNEL = 21; 
 
-const int SIGNAL_LIGHT = 1;
+const int SIGNAL_LIGHT = 22;
 int signalLightTimer;
 bool signalLight = false;
 
@@ -61,10 +65,10 @@ void setup()
 #endif
 
   setupElec(SPIKE_PIN,SPIKE_CHANNEL); //setup spike for PCM
-  turnOnSpike(SPIKE_PIN,SPIKE_CHANNEL); //turn on spike
+  turnOnSpike(SPIKE_PIN); //turn on spike
 
-  pinMode(SIGNAL_LIGHT_PIN, OUTPUT);
-  digitalWrite(SIGNAL_LIGHT_PIN, HIGH);
+  pinMode(SIGNAL_LIGHT, OUTPUT);
+  digitalWrite(SIGNAL_LIGHT, HIGH);
   signalLight = true;
   signalLightTimer = millis(); //start signal light timer
 
@@ -110,11 +114,7 @@ void setup()
 
 void loop() 
   { 
-    //update every 50ms
-    if(millis()-armPositionTimer > 50){
-      armPositionTimer = millis();
-      armControl();
-    }
+ 
     
     //update every 500 ms
     if(millis() - signalLightTimer > 500){
