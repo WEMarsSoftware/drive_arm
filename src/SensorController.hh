@@ -285,10 +285,10 @@ void SensorController::potSPICmd() {
     retVal = vspi->transfer(0);
     potVals[address] |= (int)retVal;
 
-    
+    digitalWrite(VSPI_CS_POT, HIGH);
     vspi->endTransaction();
   }
-  digitalWrite(VSPI_CS_POT, HIGH);
+
 }
 #endif
 
