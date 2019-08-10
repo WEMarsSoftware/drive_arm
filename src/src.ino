@@ -10,9 +10,6 @@
 #include "PreprocessorOptions.hh"
 #include "esp32-hal-ledc.h"
 
-#ifndef DEBUG
-#define DEBUG
-#endif
 
 // required for hal-ledc
 const int LEFT_DRIVE_CHANNELS[] = {1, 2, 3};
@@ -21,12 +18,8 @@ const int RIGHT_DRIVE_CHANNELS[] = {4, 5, 6};
 const int LEFT_DRIVE_PINS[] = {15, 2, 4};
 const int RIGHT_DRIVE_PINS[] = {16, 17, 5};
 
-const int SPIKE_PIN = 1; //need real spike pin
-const int SPIKE_CHANNEL = 21; 
 
-const int SIGNAL_LIGHT = 22;
-int signalLightTimer;
-bool signalLight = false;
+
 
 const int NUM_MOTORS_PER_SIDE = 3;
 
@@ -44,6 +37,8 @@ int lastPingVal = 0;
 // Stops motors if we lost connection
 void IRAM_ATTR onTimer() {
   portENTER_CRITICAL_ISR(&timerMux);
+
+  
   
 #ifdef DEBUG
   Serial.println(F("On timer"));
@@ -65,14 +60,11 @@ void setup()
 #endif
 
   setupElec(SPIKE_PIN,SPIKE_CHANNEL); //setup spike for PCM
-  turnOnSpike(SPIKE_PIN); //turn on spike
+  turnOnSpike(); //turn on spike
 
   pinMode(SIGNAL_LIGHT, OUTPUT);
   digitalWrite(SIGNAL_LIGHT, HIGH);
   signalLight = true;
-  signalLightTimer = millis(); //start signal light timer
-
-  
 
   // setup electrical stuff
   for (int i = 0; i < NUM_MOTORS_PER_SIDE; i++) {
@@ -82,6 +74,9 @@ void setup()
     setDriveChannel(i, LEFT_DRIVE_CHANNELS[i]);
     setDriveChannel(i+3, RIGHT_DRIVE_CHANNELS[i]);
   }
+
+
+  
 
   
   // run WiFi server and control motor PWM outputs (CORE 0 - secondary core)
@@ -98,37 +93,34 @@ void setup()
   
   connectToWiFi();
   setupESPServer(NULL);
-  
+
+  /*
   // timer interrupt to check for connection loss
   // runs once per second
   timer = timerBegin(0, 80, true);
   timerAttachInterrupt(timer,&onTimer , true);
   timerAlarmWrite(timer, 2000000, true);
-  timerAlarmEnable(timer);
+  timerAlarmEnable(timer);*/
 
   // run sensor ISR on main core
    SensorController::setupSensors(nullptr);
 
-   armPositionTimer = millis();
 }
 
 void loop() 
   { 
- 
-    
+    /*
     //update every 500 ms
     if(millis() - signalLightTimer > 500){
       signalLightTimer = millis(); //reset timer
       //if websocket connected
-      if(gp_connected){
-        //blink
-        if(signalLight){
+      if(signalLight){
           digitalWrite(SIGNAL_LIGHT, LOW);
         }
         else{
           digitalWrite(SIGNAL_LIGHT,HIGH);
         }
         signalLight = !signalLight; //invert status
-      }
-    }
+      
+    }*/
   }

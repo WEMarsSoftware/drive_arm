@@ -120,10 +120,35 @@ int deltaTicks[NUM_CHASSIS_MOTORS] = {};
 const int CORE_LOOP_DELAY = 10;
 const int ENCODER_TIME = 1000;
 
+
+const int SIGNAL_LIGHT = 22;
+int signalLightCounter = 0;
+bool signalLight = false;
+bool gp_connected = false;
+
 void SensorController::sensorsCoreLoop()
 {
 	while (true)
 	{
+
+  signalLightCounter++;
+  if(signalLightCounter > 100){
+    signalLightCounter = 0;
+
+    Serial.print(gp_connected);
+    //if websocket connected
+    if(gp_connected)
+    {
+      if(signalLight){
+        digitalWrite(SIGNAL_LIGHT, LOW);
+      }
+      else{
+        digitalWrite(SIGNAL_LIGHT,HIGH);
+      }
+      signalLight = !signalLight; //invert status
+    }
+  }
+  //
    
 #ifdef ARMCONTROLLER   
     potSPICmd();
@@ -132,7 +157,6 @@ void SensorController::sensorsCoreLoop()
    //max speed 1.2khz = 1.2m/s
    //min speed 12hz = .012m/s
     #ifdef DRIVECONTROLLER
-    digitalWrite(21,HIGH);
 		for (int i = 0; i < NUM_CHASSIS_MOTORS; i++)
 		{
 			deltaTicks[i] = encoders[i].getCountRaw();
@@ -141,7 +165,6 @@ void SensorController::sensorsCoreLoop()
 			//currentValues[i] = analogRead(CURRENT_IN[i]);
 		}
    #endif
-   //digitalWrite(21,LOW);
    
 #endif
     CurrentSPICmd();
@@ -156,7 +179,7 @@ void SensorController::sensorsCoreLoop()
 void SensorController::setupSensors(void* args)
 {
 	// create RotaryEncoder objects
-  //pinMode(21, OUTPUT); //set up spark power relay  
+ 
 	#ifdef DRIVECONTROLLER
 	for (int i = 0; i < NUM_CHASSIS_MOTORS; i++)
 	{

@@ -23,6 +23,9 @@ int leftDriveTrain[] = {-1, -1, -1};
 int rightDriveTrain[] = {-1, -1, -1};
 const int MOTORS_PER_SIDE = 3;
 
+const int SPIKE_PIN = 21; 
+const int SPIKE_CHANNEL = 8; 
+
 /**
  * Our own wrapper around ledc setup and attach.
  * This should be called in main setup() once per pin.
@@ -37,12 +40,12 @@ void setupElec(int pin, int channel, int freq=VICTOR_PWM_IN_FREQUENCY, int bits=
 	ledcSetup(channel, freq, bits);
 }
 
-void turnOnSpike(int pin){
-  ledcWrite(pin, MAX_PWM_OUT);
+void turnOnSpike(){
+  ledcWrite(SPIKE_CHANNEL, MAX_PWM_OUT);
 }
 
 void turnOffSpike(){
-  ledcWrite(21, (MAX_PWM_OUT + MIN_PWM_OUT)/2);
+  ledcWrite(SPIKE_CHANNEL, (MAX_PWM_OUT + MIN_PWM_OUT)/2);
 }
 
 

@@ -32,6 +32,7 @@
 #include <WiFi.h>
 #include "ESPAsyncWebServer.h"
 #include "SPIFFS.h"
+#include "SensorController.hh"
 
 #include "CommunicationStuff.hh"
 
@@ -52,8 +53,6 @@ int iWorkingLeft;
 int iWorkingRight;
 
 int GPWnumPings;
-
-bool gp_connected = false; //if websocket is connected
 
 // COMMUNICATION CONSTANTS
 //AsyncWebServer server(80);
@@ -115,7 +114,6 @@ void onWsEvent(AsyncWebSocket * server, AsyncWebSocketClient * client, AwsEventT
     Serial.println("Websocket client connection received");
     #endif
     globalClient = client; //declare client
-    gp_connected = true;
   }
   //if the websocket has disconnected
   else if(type == WS_EVT_DISCONNECT){
@@ -123,7 +121,7 @@ void onWsEvent(AsyncWebSocket * server, AsyncWebSocketClient * client, AwsEventT
     Serial.println("Client disconnected");
     #endif
     globalClient = NULL; //to avoid errors
-    gp_connected = false;
+    //gp_connected = false;
   }
   //if data has been recieved
   else if(type == WS_EVT_DATA){
@@ -162,7 +160,7 @@ void onWsEvent(AsyncWebSocket * server, AsyncWebSocketClient * client, AwsEventT
 
     //remote turn off
     if(turnOffState()){
-      turnOffSpike();
+      //turnOffSpike();
     }
     
     /*
@@ -187,22 +185,7 @@ void onWsEvent(AsyncWebSocket * server, AsyncWebSocketClient * client, AwsEventT
   }
 }
 
-//starts wifi
-//must begin serial before calling this function
-void inline startWiFi()
-{  
-    WiFi.begin(ssid, password);
 
-    Serial.print("Connecting to WiFi...");
-    while (WiFi.status() != WL_CONNECTED) {
-      delay(500);
-      Serial.print(".");
-    }
-    Serial.println();
-    Serial.println("CONNECTED TO " + String(ssid));
-    Serial.println(WiFi.localIP());
-    Serial.println(WiFi.macAddress());
-}
 
 //starts server
 void inline startServer(){
