@@ -15,8 +15,11 @@ void startServer();
 
 
 // INFO FOR LOCAL ROUTER
-const char* ssid = "WE MARS Rover";
-const char* password = "westill1";
+
+const char* ssid = "partybus";
+const char* password = "allaboard";
+//const char* ssid = "WE MARS Rover";
+//const char* password = "westill1";
 //const char* ssid = "SM-G925W81765";
 //const char* password = "klts9796";
 
@@ -77,7 +80,7 @@ void inline connectToWiFi()
       Serial.println("Connecting to WiFi..");
 #endif
     }
-    gp_connected = true;
+    //gp_connected = true;
 
 #ifdef DEBUG
     Serial.println("CONNECTED TO " + String(ssid));
