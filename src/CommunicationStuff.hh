@@ -15,10 +15,12 @@ void startServer();
 
 
 // INFO FOR LOCAL ROUTER
-const char* ssid = "WE MARS Rover";
-const char* password = "westill1";
-//const char* ssid = "SM-G925W81765";
-//const char* password = "klts9796";
+//const char* ssid = "party";
+//const char* password = "allaboard";
+//const char* ssid = "WE MARS Rover";
+//const char* password = "westill1";
+const char* ssid = "SM-G925W81765";
+const char* password = "klts9796";
 
 
 // COMMUNICATION CONSTANTS

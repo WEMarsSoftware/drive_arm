@@ -221,8 +221,8 @@ void SensorController::setupSensors(void* args)
   digitalWrite(VSPI_CS_POT, HIGH);
   hspi->endTransaction();
   delay(1);
-  
  #endif
+ 
   pinMode(HSPI_CS_CURR, OUTPUT);
   pinMode(HSPI_CS_IO, OUTPUT);
 
