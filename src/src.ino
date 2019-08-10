@@ -35,7 +35,7 @@ void IRAM_ATTR onTimer() {
   portENTER_CRITICAL_ISR(&timerMux);
   
 #ifdef DEBUG
-  Serial.println(F("On timer"));
+  //Serial.println(F("On timer"));
   Serial.println(lastPingVal - GPWnumPings);
 #endif
   
@@ -56,13 +56,14 @@ void setup()
   
 
   // setup electrical stuff
-  for (int i = 0; i < joints; i++) {
+  
+  for (int i = 0; i < 5; i++) {
     //setupElec(ARM_PINS[i], ARM_CHANNELS[i]);
     //setupElec(RIGHT_DRIVE_PINS[i], RIGHT_DRIVE_CHANNELS[i]);
 
     //setDriveChannel(i, LEFT_DRIVE_CHANNELS[i]);
     //setDriveChannel(i+3, RIGHT_DRIVE_CHANNELS[i]);
-    setupElec(ARM_PINS[i],ARM_CHANNELS[i]);
+    //setupElec(ARM_PINS[i],ARM_CHANNELS[i]);
   }
 
   
@@ -96,9 +97,10 @@ void setup()
 
 void loop() 
   { 
+    /*
     //update every 50ms
     if(millis()-armPositionTimer > 50){
       armPositionTimer = millis();
-      armControl();
-    }
+      //armControl();
+    }*/
   }

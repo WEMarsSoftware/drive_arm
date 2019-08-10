@@ -110,11 +110,11 @@ void onWsEvent(AsyncWebSocket * server, AsyncWebSocketClient * client, AwsEventT
     }
 
     if (id == 0) {
-      controller1_data = tempData;
+      //controller1_data = tempData;
     }
     else if (id == 1) {
-      controller2_data = tempData;
-
+      //controller2_data = tempData;
+      /*
       //TODO: change into for loop
       if (btnPressed(2, 0)) {
         ledcWrite(ARM_CHANNEL[0], MAX_PWM_OUT);
@@ -146,6 +146,7 @@ void onWsEvent(AsyncWebSocket * server, AsyncWebSocketClient * client, AwsEventT
       else if (btnPressed(2, 9)) {
         ledcWrite(ARM_CHANNEL[4], MIN_PWM_OUT);
       }
+      */
     }
 
 

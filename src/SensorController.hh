@@ -124,7 +124,7 @@ void SensorController::sensorsCoreLoop()
 {
 	while (true)
 	{
-   
+   Serial.println("',:^)");
 #ifdef ARMCONTROLLER   
     potSPICmd();
 #else
@@ -240,6 +240,7 @@ void SensorController::setupSensors(void* args)
 #ifdef ARMCONTROLLER 
 // Update data from pots
 void SensorController::potSPICmd() {
+   Serial.println("1");
    byte address = 0;
   
   digitalWrite(VSPI_CS_POT, HIGH);
