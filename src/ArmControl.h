@@ -11,6 +11,9 @@ byte joints = 5;
 int armSetpoint[joints]; //most recent intentional position of arm, must update every time user moves joint //setpoint
 float p_value = ;
 
+const int ARM_PINS = {15, 2, 4, 16, 17};
+cont int ARM_CHANNELS = {1,2,3,4,5}
+
 void armControl(){
   
   //loop through joints

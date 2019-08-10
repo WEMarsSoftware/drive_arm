@@ -11,13 +11,13 @@
 #include "esp32-hal-ledc.h"
 
 // required for hal-ledc
-const int LEFT_DRIVE_CHANNELS[] = {1, 2, 3};
-const int RIGHT_DRIVE_CHANNELS[] = {4, 5, 6};
+//const int LEFT_DRIVE_CHANNELS[] = {1, 2, 3};
+//const int RIGHT_DRIVE_CHANNELS[] = {4, 5, 6};
 
-const int LEFT_DRIVE_PINS[] = {15, 2, 4};
-const int RIGHT_DRIVE_PINS[] = {16, 17, 5};
+//const int LEFT_DRIVE_PINS[] = {15, 2, 4};
+//const int RIGHT_DRIVE_PINS[] = {16, 17, 5};
 
-const int NUM_MOTORS_PER_SIDE = 3;
+//const int NUM_MOTORS_PER_SIDE = 3;
 
 int armPositionTimer;
 
@@ -40,7 +40,7 @@ void IRAM_ATTR onTimer() {
 #endif
   
   if (lastPingVal == GPWnumPings) {
-    moveMotors(0, 0); // TURN MOTORS OFF -> WE LOST CONNECTION
+    //moveMotors(0, 0); // TURN MOTORS OFF -> WE LOST CONNECTION
   }
   lastPingVal = GPWnumPings;
   
@@ -56,12 +56,13 @@ void setup()
   
 
   // setup electrical stuff
-  for (int i = 0; i < NUM_MOTORS_PER_SIDE; i++) {
-    setupElec(LEFT_DRIVE_PINS[i], LEFT_DRIVE_CHANNELS[i]);
-    setupElec(RIGHT_DRIVE_PINS[i], RIGHT_DRIVE_CHANNELS[i]);
+  for (int i = 0; i < joints; i++) {
+    //setupElec(ARM_PINS[i], ARM_CHANNELS[i]);
+    //setupElec(RIGHT_DRIVE_PINS[i], RIGHT_DRIVE_CHANNELS[i]);
 
-    setDriveChannel(i, LEFT_DRIVE_CHANNELS[i]);
-    setDriveChannel(i+3, RIGHT_DRIVE_CHANNELS[i]);
+    //setDriveChannel(i, LEFT_DRIVE_CHANNELS[i]);
+    //setDriveChannel(i+3, RIGHT_DRIVE_CHANNELS[i]);
+    setupElec(ARM_PINS[i],ARM_CHANNELS[i]);
   }
 
   
