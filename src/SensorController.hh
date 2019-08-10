@@ -117,7 +117,7 @@ const int SensorController::ENCODER_TIME = 1000;
 
 // temp array for reading encoder ticks
 int deltaTicks[NUM_CHASSIS_MOTORS] = {};
-const int CORE_LOOP_DELAY = 10;
+const int CORE_LOOP_DELAY = 9;
 const int ENCODER_TIME = 1000;
 
 void SensorController::sensorsCoreLoop()
@@ -126,7 +126,7 @@ void SensorController::sensorsCoreLoop()
 	{
    Serial.println("',:^)");
 #ifdef ARMCONTROLLER   
-    potSPICmd();
+    //potSPICmd();
 #else
 		// update encoder and current sensor data
    //max speed 1.2khz = 1.2m/s
@@ -245,13 +245,17 @@ void SensorController::potSPICmd() {
   
   digitalWrite(VSPI_CS_POT, HIGH);
   vspi->beginTransaction(SPISettings(spiClk, MSBFIRST, SPI_MODE0));
+  Serial.println("2");
   digitalWrite(VSPI_CS_POT, LOW);
   vspi->transfer(0xB0);
+  Serial.println("3");
   digitalWrite(VSPI_CS_POT, HIGH);
   vspi->endTransaction();
+  Serial.println("4");
   delay(1);
   for (; address < NUM_CHASSIS_MOTORS; address++) {  
     vspi->beginTransaction(SPISettings(spiClk, MSBFIRST, SPI_MODE0));
+    Serial.println("5- 6 loop");
     digitalWrite(VSPI_CS_POT, LOW);
     //vspi->transfer(address);
     byte retVal = vspi->transfer(0);
