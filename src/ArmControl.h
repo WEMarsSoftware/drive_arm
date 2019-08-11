@@ -15,7 +15,6 @@ const int ARM_PINS[] = {15, 2, 4, 16, 17};
 const int ARM_CHANNELS[] = {0,1,2,3,4};
 
 
-
 /*
 void armControl(){
   

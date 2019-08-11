@@ -63,6 +63,22 @@ bool btnPressed(int buttonID) {
   }
 }
 
+//sets motor speed based on if buttons are pressed
+void setMotorSpeed(int channel, int btnFwd, int btnBack, int percentSpeed){
+  int pwr;
+  if(btnPressed(btnFwd)){
+    pwr = map(percentSpeed, -100, 100, MIN_PWM_OUT, MAX_PWM_OUT);
+  }
+  else if(btnPressed(btnBack)){
+    pwr = map(percentSpeed*-1, -100, 100, MIN_PWM_OUT, MAX_PWM_OUT);
+  }
+  else{
+    pwr = NO_POWER_PWM; //turn off motor
+  }
+
+  ledcWrite(ARM_CHANNELS[channel],pwr); //write speed to motor
+}
+
 //if there is a websocket event
 void onWsEvent(AsyncWebSocket * server, AsyncWebSocketClient * client, AwsEventType type, void * arg, uint8_t *data, size_t len) {
 
@@ -110,6 +126,29 @@ void onWsEvent(AsyncWebSocket * server, AsyncWebSocketClient * client, AwsEventT
     }
     */
 
+    
+    
+    setMotorSpeed(2,14,15,15); //x axis
+    
+    //if right trigger pressed
+    if(btnPressed(7)){
+      setMotorSpeed(1,0,1,35); //manipulator rotation
+      setMotorSpeed(3,4,5,50); //elbow
+      setMotorSpeed(0,13,12,45); //y axis at triple speed
+      setMotorSpeed(4,2,3,30); //gripper claw at double speed
+    }
+    else{
+      setMotorSpeed(1,0,1,15); //manipulator rotation
+      setMotorSpeed(3,4,5,25); //elbow
+      setMotorSpeed(4,2,3,15); //gripper claw at normal speed
+      setMotorSpeed(0,13,12,15); //y axis at normal speed
+    }
+      
+    
+
+    
+
+    /*
     int motorXpwr = map(controller_data[1],PERCENTAGE_0,PERCENTAGE_100,MIN_PWM_OUT,MAX_PWM_OUT);
     int motorYpwr = map(controller_data[2],PERCENTAGE_0,PERCENTAGE_100,MIN_PWM_OUT,MAX_PWM_OUT);
     //motor 0
@@ -125,19 +164,20 @@ void onWsEvent(AsyncWebSocket * server, AsyncWebSocketClient * client, AwsEventT
       ledcWrite(ARM_CHANNELS[2],power_b);
     }
     else{
-      ledcWrite(ARM_CHANNELS,NO_POWER_PWM);
+      ledcWrite(ARM_CHANNELS[2],NO_POWER_PWM);
     }
 
     //motor 3
     if(btnPressed(1)){
-      ledcWrite(ARM_CHANNELS[2],power_f);
+      ledcWrite(ARM_CHANNELS[3],power_f);
     }
     else if(btnPressed(2)){
-      ledcWrite(ARM_CHANNELS[2],power_b);
+      ledcWrite(ARM_CHANNELS[3],power_b);
     }
     else{
-      ledcWrite(ARM_CHANNELS,NO_POWER_PWM);
+      ledcWrite(ARM_CHANNELS[3],NO_POWER_PWM);
     }
+    */
   }
 }
 
