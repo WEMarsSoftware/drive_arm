@@ -81,8 +81,6 @@ void setup()
 
 
   
-
-  
   // run WiFi server and control motor PWM outputs (CORE 0 - secondary core)
   
    /**xTaskCreatePinnedToCore(
