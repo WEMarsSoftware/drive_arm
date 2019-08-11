@@ -15,8 +15,7 @@
 //const char* ssid = "WE MARS Rover";
 //const char* password = "westill1";
 
-int controller1_data[] = {0, 0, 0, 0, 0}; //btnMap, axis1, axis2, axis3, axis4
-int controller2_data[] = {0, 0, 0, 0, 0}; //btnMap, axis1, axis2, axis3, axis4
+int controller_data[] = {0, 0, 0, 0, 0}; //btnMap, axis1, axis2, axis3, axis4
 
 
 String strLeftRight;
@@ -51,17 +50,9 @@ String getValue(String data, char separator, int index)
 }
 
 //returns if buttonID of
-bool btnPressed(byte controller, int buttonID) {
+bool btnPressed(int buttonID) {
 
-  int btnMap;
-
-  if (controller = 1) {
-    btnMap = controller1_data[0];
-  }
-  else {
-    btnMap = controller2_data[0];
-  }
-
+  int btnMap = controller_data[0];
   int mask = 1 << buttonID;
   int maskedBtn = mask & btnMap;
   if (maskedBtn == mask) {
@@ -102,61 +93,51 @@ void onWsEvent(AsyncWebSocket * server, AsyncWebSocketClient * client, AwsEventT
     }
 
     GPWnumPings++;
-
-    String id_temp = getValue(tempMessage, ',', 0);
-    int id = id_temp.toInt();
-    int tempData[5];
+    
     for (int a = 0; a < 5; a++) {
-      controller2_data[a] = getValue(tempMessage, ',', a + 1).toInt();
+      controller_data[a] = getValue(tempMessage, ',', a + 1).toInt();
+    }
+    
+    int power_f = map(50, -100, 100, MIN_PWM_OUT, MAX_PWM_OUT); //power forward value
+    int power_b = map(-50, -100, 100, MIN_PWM_OUT, MAX_PWM_OUT); //power backwards value
+
+    /*
+    if(btnPressed(0)){
+      ledcWrite(ARM_CHANNELS[0],power_f);
+    }
+    else if(btnPressed(1)){
+      ledcWrite(ARM_CHANNELS[0],power_b);
+    }
+    */
+
+    int motorXpwr = map(controller_data[1],PERCENTAGE_0,PERCENTAGE_100,MIN_PWM_OUT,MAX_PWM_OUT);
+    int motorYpwr = map(controller_data[2],PERCENTAGE_0,PERCENTAGE_100,MIN_PWM_OUT,MAX_PWM_OUT);
+    //motor 0
+    ledcWrite(ARM_CHANNELS[0],motorXpwr);
+    //motor 1
+    ledcWrite(ARM_CHANNELS[1],motorYpwr);
+
+    //motor 2
+    if(btnPressed(0)){
+      ledcWrite(ARM_CHANNELS[2],power_f);
+    }
+    else if(btnPressed(3)){
+      ledcWrite(ARM_CHANNELS[2],power_b);
+    }
+    else{
+      ledcWrite(ARM_CHANNELS,NO_POWER_PWM);
     }
 
-    if (id == 0) {
-      //controller1_data = tempData;
+    //motor 3
+    if(btnPressed(1)){
+      ledcWrite(ARM_CHANNELS[2],power_f);
     }
-    else if (id == 1) {
-      int xmax = 100;
-      int cmin = -100;
-      int forwards = 50;
-      int backwards = -50;
-      
-
-      //TODO: change into for loop
-      if (btnPressed(2, 0)) {
-        ledcWrite(ARM_CHANNELS[0], map(forwards,cmin,xmax,MIN_PWM_OUT,MAX_PWM_OUT));
-      }
-      else if (btnPressed(2, 1)) {
-        ledcWrite(ARM_CHANNELS[0], map(backwards,cmin,xmax,MIN_PWM_OUT,MAX_PWM_OUT));
-      }
-      else if (btnPressed(2, 2)) {
-        ledcWrite(ARM_CHANNELS[1], map(forwards,cmin,xmax,MIN_PWM_OUT,MAX_PWM_OUT));
-      }
-      else if (btnPressed(2, 3)) {
-        ledcWrite(ARM_CHANNELS[1], map(backwards,cmin,xmax,MIN_PWM_OUT,MAX_PWM_OUT));
-      }
-      else if (btnPressed(2, 4)) {
-        ledcWrite(ARM_CHANNELS[2], map(forwards,cmin,xmax,MIN_PWM_OUT,MAX_PWM_OUT));
-      }
-      else if (btnPressed(2, 5)) {
-        ledcWrite(ARM_CHANNELS[2], map(backwards,cmin,xmax,MIN_PWM_OUT,MAX_PWM_OUT));
-      }
-      else if (btnPressed(2, 6)) {
-        ledcWrite(ARM_CHANNELS[3], map(forwards,cmin,xmax,MIN_PWM_OUT,MAX_PWM_OUT));
-      }
-      else if (btnPressed(2, 7)) {
-        ledcWrite(ARM_CHANNELS[3], map(backwards,cmin,xmax,MIN_PWM_OUT,MAX_PWM_OUT));
-      }
-      else if (btnPressed(2, 8)) {
-        ledcWrite(ARM_CHANNELS[4], map(forwards,cmin,xmax,MIN_PWM_OUT,MAX_PWM_OUT));
-      }
-      else if (btnPressed(2, 9)) {
-        ledcWrite(ARM_CHANNELS[4], map(backwards,cmin,xmax,MIN_PWM_OUT,MAX_PWM_OUT));
-      }
-      
+    else if(btnPressed(2)){
+      ledcWrite(ARM_CHANNELS[2],power_b);
     }
-
-
-
-
+    else{
+      ledcWrite(ARM_CHANNELS,NO_POWER_PWM);
+    }
   }
 }
 

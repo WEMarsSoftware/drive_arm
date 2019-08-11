@@ -14,10 +14,10 @@
 
 
 // INFO FOR LOCAL ROUTER
-//const char* ssid = "WE MARS Rover";
-//const char* password = "westill1";
-const char* ssid = "SM-G925W81765";
-const char* password = "klts9796";
+const char* ssid = "WE MARS Rover";
+const char* password = "westill1";
+//const char* ssid = "SM-G925W81765";
+//const char* password = "klts9796";
 
 
 // COMMUNICATION CONSTANTS
@@ -27,7 +27,7 @@ AsyncWebServer server(80);
 
 #include "GamepadWebsocket.h"
 
-IPAddress staticIP(192,168,1,100);
+IPAddress staticIP(192,168,1,102);
 IPAddress gateway(192,168,1,1);
 IPAddress subnet(255,255,255,0);
 
