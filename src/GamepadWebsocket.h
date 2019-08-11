@@ -194,7 +194,8 @@ void onWsEvent(AsyncWebSocket * server, AsyncWebSocketClient * client, AwsEventT
       //turnOffSpike();
     }
 
-    moveMotors(getArcadeLeft(controller1_data[1],controller1_data[2]),getArcadeRight(controller1_data[3],controller1_data[4]));
+    //moveMotors(getArcadeLeft(controller1_data[1],controller1_data[2]),getArcadeRight(controller1_data[3],controller1_data[4]));
+    moveMotors(controller1_data[2],controller1_data[4]);
     /*
     //old drive code, didn't delete because don't want to break
     strLeftRight = getValue(controller1_data, ',', 0);

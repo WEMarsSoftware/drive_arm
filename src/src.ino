@@ -63,7 +63,8 @@ void setup()
 
   //siCurrentResetByte = 0xff;
 
-  setupElec(SPIKE_PIN,SPIKE_CHANNEL); //setup spike for PCM
+  //setupElec(SPIKE_PIN,SPIKE_CHANNEL); //setup spike for PCM
+  pinMode(SPIKE_PIN, OUTPUT);
   turnOnSpike(); //turn on spike
 
   pinMode(SIGNAL_LIGHT, OUTPUT);

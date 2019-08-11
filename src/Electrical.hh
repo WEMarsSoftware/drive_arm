@@ -42,11 +42,13 @@ void setupElec(int pin, int channel, int freq=VICTOR_PWM_IN_FREQUENCY, int bits=
 }
 
 void turnOnSpike(){
-  ledcWrite(SPIKE_CHANNEL, MAX_PWM_OUT);
+  //ledcWrite(SPIKE_CHANNEL, MAX_PWM_OUT);
+  digitalWrite(SPIKE_PIN, HIGH);
 }
 
 void turnOffSpike(){
-  ledcWrite(SPIKE_CHANNEL, (MAX_PWM_OUT + MIN_PWM_OUT)/2);
+  //ledcWrite(SPIKE_CHANNEL, (MAX_PWM_OUT + MIN_PWM_OUT)/2);
+  digitalWrite(SPIKE_PIN,LOW);
 }
 
 
